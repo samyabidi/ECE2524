@@ -1,0 +1,25 @@
+the parts file contains a 5 line system that is repeated
+the 1st line is the partid, 2nd is part description, 3rd is footprint and finally 4th is quantity available
+the 5th line is a space to denote a seperation between consecutive items.
+
+the action files are all 5 slightly different but follow some conventions
+the 1st line of all action files have just a single term, the action which the particular action file executes
+
+in the case of the add function:
+the first 4 lines are the different fields of a part seperated by colon with the actual field value
+
+in the case of the remove function
+their is a single line which has a field descriptor and its value seperated by colon
+
+in the case of set/update
+their are two lines each with a field descriptor and a field value seperated by colon
+the first line tells us what field to reset and what value to give it while 
+the second line tells us what field of what part we should be looking for and what value it must have 
+if we want to reset one of its values
+
+in the case of list
+first line is a field descriptor and a value seperated by colon
+the program then prints out all parts with that value in the that field descriptor
+
+in the case of sort
+the first line is just a field descriptor by which to sort
