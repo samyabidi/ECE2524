@@ -1,16 +1,16 @@
-# ECE 2524 Homework 4 Problem 1 <Samy Abidi> change
+# ECE 2524 Homework 4 Problem 1.1 <Samy Abidi> change
 import argparse, fileinput, string
 from optparse import OptionParser
 import sys
 import operator
-#the list of dictionary structures and the list that holds the action files
+#the list of dictionary structures
 ldlist = [];
+ldlistsort = [];
+ldlist2 = [];
+#the list of lines inside the action file
 filelist = [];
-print "beginning inventory actions";
-#when you are loading into file filelist is zero otherwise it is one
-#for reading command line
-#print(sys.argv[2]);
-
+#print "beginning inventory actions";
+#when you are loading action, and also loading the results into an output file filelist is zero otherwise it is one
 
 #loads the data file into an array
 def create_dic(arg1):
@@ -19,7 +19,7 @@ def create_dic(arg1):
     f = open(arg1, 'r');
     for line in f:
         line = line.replace('\n','');
-        if(count == 0):
+        if(count == 0): 
            line1 = line; 
         if(count == 1):
            line2 = line;
@@ -30,17 +30,14 @@ def create_dic(arg1):
         if(count == 4):
            count = 0;
            count2 = count2 + 1;
-           Parts = {'ID':line1,'Desc':line2,'Foot':line3,'quant':line4};
+           Parts = {'ItemID':line1,'Desc':line2,'Foot':line3,'Quant':line4};#filling the dictionary with choosen keys
            ldlist.append(Parts);
         else:
             count = count + 1;
-        
-        
-    print(ldlist);
-    newlist = sorted(ldlist, key=lambda k: k['Foot']);#to access single dic do newlist
-#newlist[0]['ID'];
-#create_dic("files/parts");
+    #print (ldlist); #this is all the items in inventory placed into a list of dicitonaries
+
 def command_call():#for reading the input command file
+    #temp variables
     tempid = 0;
     tempd = 0;
     tempf = 0;
@@ -51,203 +48,169 @@ def command_call():#for reading the input command file
     val2 = '';
     valdescriptor1 = 0;
     valdescriptor2 = 0;
+    #end temp variables
 # for reading action files
     filelist = [];
     for line_input in sys.stdin:
         filelist.append(line_input.replace('\n',''));
-#if you are pushing all the information into another file then filelist[0] exists
-#but if you are not pushing it into another file then filelist[1] is the first element with data so I creaetd a try statement here to solve the problem.
+    #checks which array position holds first value, depends on whether you are pushing values to output file
     try:
         if(filelist[0] == 'add' or filelist[0] == 'remove' or filelist[0] == 'set/update' or filelist[0] == 'list' or filelist[0] == 'sort'):
             arraypos = 0;
     except ValueError:
         arraypos = 1;
-    print "this is what array pos equals";
-    print arraypos
-    if(filelist[0] == 'add'):
-        #print 'add';
-        #segment the rest of filelist here and call the add function
-        tempf = filelist[1].split(':');
-        tempd = filelist[2].split(':');
-        tempid = filelist[3].split(':');
-        tempq = filelist[4].split(':');
-        add(tempf[1],tempd[1],tempid[1],tempq[1]);
-    if(filelist[0] == 'remove'):
-        tempid = filelist[1].split(':');
-        remove(tempid[1]);
-    if(filelist[0] == 'set/update'):
-        val1 = filelist[1].split(':');
-        val2 = filelist[2].split(':');
-        valdescriptor1 = filelist[1].split(':');
-        valdescriptor2 = filelist[2].split(':');
-        val1 = val1[1]
-        val2 = val2[1]
-        valdescriptor1 = valdescriptor1[0];
-        valdescriptor2 = valdescriptor2[0];
-        print "printing all important vals";
-        print val1;
-        print val2;
-        print valdescriptor1;
-        print valdescriptor2;
-        setupdate(val1,val2,valdescriptor1,valdescriptor2)
-        print 'set';
-    if(filelist[0] == 'list'):
-        print 'list';
-    if(filelist[0] == 'sort'):
-        print 'sort';
-
-def add(foot,desc,ID,quant):
-    Parts = {'ID':ID,'Desc':desc,'Foot':foot,'quant':quant};
+    count2 = 0;
+    while(len(filelist)>count2):
+        rep_done = 0;
+        if(rep_done == 0):
+            if(filelist[count2 + 0] == 'add'):
+                #segment the rest of filelist here, then call add, then increment count2 to point to first 
+                #line of new command
+                tempid = filelist[count2 +1].split(':');
+                tempd = filelist[count2 +2].split(':');
+                tempf = filelist[count2 +3].split(':');
+                tempq = filelist[count2 +4].split(':');
+                add(tempid[1],tempd[1],tempf[1],tempq[1]);
+                count2 = count2 + 5;
+                rep_done = 1;
+        if(rep_done == 0):    
+        #segment values for remove and then increment count2 to move to next command if available
+            if(filelist[count2 +0] == 'remove'):
+                tempid = filelist[count2 +1].split(':');
+                remove(tempid[0],tempid[1]);
+                count2 = count2 + 2;
+                rep_done = 1;
+        if(rep_done == 0):
+            if(filelist[count2 +0] == 'set/update'):
+                val1 = filelist[count2 +1].split(':');
+                val2 = filelist[count2 +2].split(':');
+                valdescriptor1 = filelist[count2 +1].split(':');
+                valdescriptor2 = filelist[count2 +2].split(':');
+                val1 = val1[1]
+                val2 = val2[1]
+                valdescriptor1 = valdescriptor1[0];
+                valdescriptor2 = valdescriptor2[0];
+                setupdate(val1,val2,valdescriptor1,valdescriptor2)
+                count2 = count2 + 3
+                rep_done = 1;
+        if(rep_done == 0 ):        
+            if(filelist[count2 +0] == 'list'):
+            #if no second line to describe what item and val to list then list all
+                try:
+                    val1 = filelist[count2 +1].split(':');
+                    valdescriptor1 = filelist[count2 +1].split(':');
+                    val1 = val1[1]
+                    valdescriptor1 = valdescriptor1[0];
+                except:
+                    val1 = 'all';
+                    valdescriptor1 = 'all'
+                list_item(val1,valdescriptor1)
+                count2 = count2 +2 ;
+                rep_done = 1;
+        if(rep_done == 0):
+            if(filelist[count2 +0] == 'sort'):
+                valdescriptor1 = filelist[count2 +1].split(':');
+                valdescriptor1 = valdescriptor1[0];
+                sort(valdescriptor1)
+                count2 = count2 +2 ;
+                rep_done = 1;
+                
+def add(ID,desc,foot,quant):
+    Parts = {'ItemID':ID,'Desc':desc,'Foot':foot,'Quant':quant};
     ldlist.append(Parts);
+    write_back("files/parts");
+    print 'add OK'
 
-def remove(ID):
+def remove(field_d,val):
     count = 0;
-    for item in ldlist:
-        if(item['ID'] == ID):
+    ldlist2 = list(ldlist);
+    for item in ldlist2:
+        if(item[field_d] == val):# means we have a match for the part to have a field updated
             ldlist.pop(count);
-            count = count -1;
-        count = count + 1;
-#this needs to be able to search any kind of characteristic of the electronic part     
-def setupdate(val1,val2,valdescriptor,valdescriptor2): #ID,Foot, Desc, quant,valdescriptor,valdescriptor2):          
-    count = 0;
-    Quant = '';
-    Foot = '';
-    Desc = '';
-    ID = '';
-    print valdescriptor;
-    print valdescriptor2;
-    if(valdescriptor == "itemID"):
-        valdescriptor = 4 
-        ID = val1;
-    if(valdescriptor == "Descriptor"):
-        valdescriptor = 1
-        Desc = val1
-    if(valdescriptor == "Footprint"):
-        valdescriptor = 2
-        Foot = val1
-    if(valdescriptor == "Quantity"):
-        valdescriptor = 3
-        Quant = val1;
-    if(valdescriptor2 == "itemID"):
-        valdescriptor2 = 4
-        ID = val2 
-    if(valdescriptor2 == "Descriptor"):
-        valdescriptor2 = 1
-        Desc = val2
-    if(valdescriptor2 == "Footprint"):
-        valdescriptor2 = 2
-        Foot = val2
-    if(valdescriptor2 == "Quantity"):
-        valdescriptor2 = 3
-        Quant = val2
-    print "before entering loop";
-    print val1;
-    print val2;
-    print valdescriptor;
-    print valdescriptor2;
-    print Quant;
-    print Foot;
-    print Desc;
-    print ID;
+        else:
+            count = count + 1;
+    write_back("files/parts");
+    print 'remove OK'    
+            
+def setupdate(val1,val2,valdescriptor,valdescriptor2):
     for item in ldlist:
-        print item['ID'];
-        if(item['ID'] == ID):#item[valdescriptor2] == val2 ?
-            print "IN HERE DDDDDDDDD";
-            if(valdescriptor == 1):
-                ldlist[count]['Desc'] = Desc;
-            if(valdescriptor == 2):
-                ldlist[count]['Foot'] = Foot;
-            if(valdescriptor == 3):
-                print "in HEREREEE";
-                ldlist[count]['quant'] = Quant;
-            if(valdescriptor == 4):
-                ldlist[count]['ID'] = ID;
-        if(item['Desc'] == Desc and valdescriptor2 != 1 ):
-            if(valdescriptor == 1):
-                ldlist[count]['Desc'] = Desc;
-            if(valdescriptor == 2):
-                ldlist[count]['Foot'] = Foot;
-            if(valdescriptor == 3):
-                ldlist[count]['quant'] = Quant;
-            if(valdescriptor == 4):
-                ldlist[count]['ID'] = ID;
-        if(item['Foot'] == Foot and valdescriptor2 != 2 ):
-            if(valdescriptor == 1):
-                ldlist[count]['Desc'] = Desc;
-            if(valdescriptor == 2):
-                ldlist[count]['Foot'] = Foot;
-            if(valdescriptor == 3):
-                ldlist[count]['quant'] = Quant;
-            if(valdescriptor == 4):
-                ldlist[count]['ID'] = ID;
-        if(item['quant'] == Quant and valdescriptor2 != 3 ):
-            if(valdescriptor == 1):
-                ldlist[count]['Desc'] = Desc;
-            if(valdescriptor == 2):
-                ldlist[count]['Foot'] = Foot;
-            if(valdescriptor == 3):
-                ldlist[count]['quant'] = Quant;
-            if(valdescriptor == 4):
-                ldlist[count]['ID'] = ID;
-        count = count + 1;   
+        if(item[valdescriptor2] == val2):# means we have a match for the part to have a field updated
+            item[valdescriptor] = val1;
+    write_back("files/records");
+    print 'set OK';      
+            
+            
+def list_item(val1,valdescriptor):
+    while len(ldlistsort) > 0 : ldlistsort.pop() #empty the list sent to sort even if it is not being sent, just for safety
+    if(val1 == 'all'):
+        for item in ldlist:
+            print item;
+            ldlistsort.append(item);
+    else:
+        for item in ldlist:
+            if(item[valdescriptor] == val1):# means we have a match for the part to have a field updated
+                print item;
+                ldlistsort.append(item);
+    print'list OK'
+                      
 
+def sort(valdescriptor):
+    for item in ldlistsort:
+        newlist = sorted(ldlistsort, key = lambda k: k[valdescriptor])#sorts in the same form that is saved here
+    for item in newlist:
+        print item;
     
-def list(ID,Foot, Desc, quant,valdescriptor):          
-    count = 0;
+    print'sort OK'
+
+def write_back(arg1):
+    f = open(arg1, 'w');
     for item in ldlist:
-        if(item['ID'] == ID and valdescriptor2 != 4 ):
-            print item;
-        if(item['Desc'] == Desc and valdescriptor2 != 1 ):
-            print item;
-        if(item['Foot'] == Foot and valdescriptor2 != 2 ):
-            print item;
-        if(item['quant'] == quant and valdescriptor2 != 3 ):
-            print item;
-        count = count + 1;   
-        
-def sort(ID,Foot, Desc, quant,valdescriptor):          
-    count = 0;
-    for item in ldlist:
-        if(valdescriptor2 != 4 ):
-            newlist = sorted(ldlist, key=lambda k: k['ID']);
-        if(valdescriptor2 != 1 ):
-            newlist = sorted(ldlist, key=lambda k: k['Desc']);
-        if(valdescriptor2 != 2 ):
-            newlist = sorted(ldlist, key=lambda k: k['Foot']);
-        if(valdescriptor2 != 3 ):
-            newlist = sorted(ldlist, key=lambda k: k['quant']);
-        count = count + 1;  
+        f.write(item["ItemID"]);
+        f.write('\n')
+        f.write(item["Desc"]);
+        f.write('\n')
+        f.write(item["Foot"]);
+        f.write('\n')
+        f.write(item["Quant"]);
+        f.write('\n');
+        f.write('\n')
+    
 
+            
+#running of the code-equivalent to main
 
-
-#################beginning actual calls
-
-create_dic("files/parts");
-command_call();
-print(ldlist);
-
-
-
-
-
-
-
-
-
-   
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+#accepts proper command line arguments
+if(sys.argv[1] == '-f' or sys.argv[1] == '--data-file'):
+    create_dic("files/records");
+    command_call();        
+elif(sys.argv[1] == '-h' or sys.argv[1] == '--help'):
+     sys.stdout.write("this program deals with inventory\n");  
+else:
+    sys.stdout.write("not the correct CLA from standard\n");        
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
+            
 
