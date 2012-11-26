@@ -1,0 +1,3 @@
+
+paper.html: paper1
+	pandoc paper1 -o paper.html
